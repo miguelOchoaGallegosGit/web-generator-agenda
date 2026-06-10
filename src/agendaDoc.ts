@@ -183,7 +183,7 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
 
   // Build individual A5 page content
   const a5Pages: Table[] = pageGroups.map((group, index) => {
-    if (modelId === "clasica") return classicPage(group);
+    if (modelId === "clasica") return classicPage(group, index);
     if (modelId === "color-pop") return colorPopPage(group);
     return weekPage(group, selectedModel, index + 1, pageGroups.length);
   });
@@ -202,17 +202,37 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
   }));
 }
 
-function classicPage(days: AgendaDay[]): Table {
+function classicPage(days: AgendaDay[], pageIndex: number): Table {
   const cells = days.map((day) => dayCellClassic(day));
   while (cells.length < 2) {
     cells.push(blankCell());
   }
+
+  const firstDay = days[0];
+  const monthText = firstDay ? firstDay.month : "";
+  const yearText = firstDay ? String(firstDay.year) : "";
+
+  const isLeftPage = pageIndex % 2 === 0;
+  const headerText = isLeftPage ? monthText : yearText;
+  const headerAlignment = isLeftPage ? AlignmentType.LEFT : AlignmentType.RIGHT;
+
+  const headerCell = new TableCell({
+    borders: emptyBorders,
+    margins: { top: 120, right: 220, bottom: 20, left: 220 },
+    children: [
+      new Paragraph({
+        alignment: headerAlignment,
+        children: [new TextRun({ text: headerText, bold: true, size: 28, color: "111827" })],
+      }),
+    ],
+  });
 
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     layout: TableLayoutType.FIXED,
     borders: emptyBorders,
     rows: [
+      new TableRow({ children: [headerCell] }),
       new TableRow({ children: [cells[0]] }),
       new TableRow({ children: [cells[1]] }),
     ],
@@ -321,13 +341,9 @@ function dayCellClassic(day: AgendaDay): TableCell {
   return new TableCell({
     width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
-    margins: { top: 160, right: 220, bottom: 180, left: 220 },
+    margins: { top: 80, right: 220, bottom: 180, left: 220 },
     borders: emptyBorders,
     children: [
-      new Paragraph({
-        alignment: AlignmentType.RIGHT,
-        children: [new TextRun({ text: `${day.month} ${day.year}`, bold: true, size: 22 })],
-      }),
       new Paragraph({
         children: [
           new TextRun({ text: day.dayNumber, bold: true, size: 30 }),
@@ -554,13 +570,35 @@ function buildDay(date: Date): AgendaDay {
   };
 }
 
-function lines(count: number, color: string, size: number): Paragraph[] {
-  return Array.from({ length: count }, () =>
-    new Paragraph({
-      spacing: { before: 70, after: 70 },
-      children: [new TextRun({ text: "______________________________________", color, size })],
-    }),
+function lines(count: number, color: string, size: number): Table[] {
+  const rows = Array.from(
+    { length: count },
+    () =>
+      new TableRow({
+        height: { value: 320, rule: HeightRule.EXACT },
+        children: [
+          new TableCell({
+            borders: {
+              top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              bottom: { style: BorderStyle.SINGLE, size: 3, color: color },
+              left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+            },
+            margins: { top: 0, right: 0, bottom: 0, left: 0 },
+            children: [new Paragraph("")],
+          }),
+        ],
+      })
   );
+
+  return [
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+      borders: emptyBorders,
+      rows,
+    }),
+  ];
 }
 
 function miniCalendar(date: Date): Paragraph[] {
