@@ -34,13 +34,13 @@ export const agendaModels: AgendaModel[] = [
   {
     id: "color-pop",
     label: "Color pop",
-    description: "Bloques alegres de cuatro días para organizar rápido.",
+    description: "Bloques alegres de dos días para organizar rápido.",
     image: "/modelos/modelo-2.jpeg",
   },
   {
     id: "semana-vista",
     label: "Semana vista",
-    description: "Una semana por página con acentos de color.",
+    description: "Dos días por página con acentos de color.",
     image: "/modelos/modelo-3.jpeg",
   },
 ];
@@ -62,12 +62,12 @@ const longDateFormatter = new Intl.DateTimeFormat("es-PE", {
 });
 
 const palette = ["F5C84C", "52C7B8", "5EA8F2", "F06292", "8D6DF2", "F59F68", "E25858"];
-const A4_PORTRAIT = { width: 11906, height: 16838 };
-const A4_MARGIN = { top: 280, right: 280, bottom: 280, left: 280 };
+const A5_PORTRAIT = { width: 8419, height: 11906 };
+const PAGE_MARGIN = { top: 280, right: 280, bottom: 280, left: 280 };
 const DAYS_BY_MODEL: Record<AgendaModelId, number> = {
   clasica: 2,
-  "color-pop": 4,
-  "semana-vista": 7,
+  "color-pop": 2,
+  "semana-vista": 2,
 };
 
 const emptyBorders = {
@@ -188,57 +188,18 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
     return weekPage(group, selectedModel, index + 1, pageGroups.length);
   });
 
-  // Pair A5 pages into diptych spreads (2 per A4 landscape sheet)
-  const spreads: [Table, Table | null][] = [];
-  for (let i = 0; i < a5Pages.length; i += 2) {
-    spreads.push([a5Pages[i], a5Pages[i + 1] ?? null]);
-  }
-
-  return spreads.map(([left, right]) => ({
+  return a5Pages.map((page) => ({
     properties: {
       page: {
         size: {
-          ...A4_PORTRAIT,
-          orientation: PageOrientation.LANDSCAPE,
+          ...A5_PORTRAIT,
+          orientation: PageOrientation.PORTRAIT,
         },
-        margin: A4_MARGIN,
+        margin: PAGE_MARGIN,
       },
     },
-    children: [diptychTable(left, right)],
+    children: [page],
   }));
-}
-
-function diptychTable(left: Table, right: Table | null): Table {
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    layout: TableLayoutType.FIXED,
-    borders: emptyBorders,
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            verticalAlign: VerticalAlign.TOP,
-            margins: { top: 100, right: 250, bottom: 100, left: 100 },
-            borders: {
-              top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-              bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-              left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-              right: { style: BorderStyle.DOTTED, size: 2, color: "D0D5DD" },
-            },
-            children: [left],
-          }),
-          new TableCell({
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            verticalAlign: VerticalAlign.TOP,
-            margins: { top: 100, right: 100, bottom: 100, left: 250 },
-            borders: emptyBorders,
-            children: right ? [right] : [new Paragraph("")],
-          }),
-        ],
-      }),
-    ],
-  });
 }
 
 function classicPage(days: AgendaDay[]): Table {
@@ -252,16 +213,15 @@ function classicPage(days: AgendaDay[]): Table {
     layout: TableLayoutType.FIXED,
     borders: emptyBorders,
     rows: [
-      new TableRow({
-        children: cells,
-      }),
+      new TableRow({ children: [cells[0]] }),
+      new TableRow({ children: [cells[1]] }),
     ],
   });
 }
 
 function colorPopPage(days: AgendaDay[]): Table {
   const cells = days.map((day, index) => dayCellColor(day, palette[index % palette.length]));
-  while (cells.length < 4) {
+  while (cells.length < 2) {
     cells.push(blankCell());
   }
   const firstDay = days[0];
@@ -271,7 +231,7 @@ function colorPopPage(days: AgendaDay[]): Table {
   const colorfulText = (text: string, size: number) =>
     text.split("").map((char, i) => new TextRun({ text: char, bold: true, size, color: palette[i % palette.length] }));
 
-  return new Table({
+  const headerTable = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     layout: TableLayoutType.FIXED,
     borders: emptyBorders,
@@ -280,20 +240,19 @@ function colorPopPage(days: AgendaDay[]): Table {
         cantSplit: true,
         children: [
           new TableCell({
-            width: { size: 46, type: WidthType.PERCENTAGE },
+            width: { size: 50, type: WidthType.PERCENTAGE },
             borders: emptyBorders,
-            margins: { top: 0, right: 70, bottom: 50, left: 70 },
+            margins: { top: 0, right: 0, bottom: 0, left: 0 },
             children: [
               new Paragraph({
                 children: colorfulText(titleMonth, 34),
               }),
             ],
           }),
-          gutterCell(),
           new TableCell({
-            width: { size: 46, type: WidthType.PERCENTAGE },
+            width: { size: 50, type: WidthType.PERCENTAGE },
             borders: emptyBorders,
-            margins: { top: 0, right: 70, bottom: 50, left: 70 },
+            margins: { top: 0, right: 0, bottom: 0, left: 0 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
@@ -303,19 +262,37 @@ function colorPopPage(days: AgendaDay[]): Table {
           }),
         ],
       }),
-      new TableRow({ cantSplit: true, children: [cells[0], gutterCell(), cells[1]] }),
+    ],
+  });
+
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    layout: TableLayoutType.FIXED,
+    borders: emptyBorders,
+    rows: [
+      new TableRow({
+        cantSplit: true,
+        children: [
+          new TableCell({
+            borders: emptyBorders,
+            margins: { top: 0, right: 70, bottom: 50, left: 70 },
+            children: [headerTable],
+          }),
+        ],
+      }),
+      new TableRow({ cantSplit: true, children: [cells[0]] }),
       new TableRow({
         height: { value: 140, rule: HeightRule.EXACT },
-        children: [blankCell(), gutterCell(), blankCell()],
+        children: [blankCell()],
       }),
-      new TableRow({ cantSplit: true, children: [cells[2], gutterCell(), cells[3]] }),
+      new TableRow({ cantSplit: true, children: [cells[1]] }),
     ],
   });
 }
 
 function weekPage(days: AgendaDay[], model: AgendaModel, page: number, total: number): Table {
   const cells = days.map((day, index) => dayCellWeek(day, palette[index % palette.length]));
-  while (cells.length < 7) {
+  while (cells.length < 2) {
     cells.push(blankCell());
   }
 
@@ -328,24 +305,21 @@ function weekPage(days: AgendaDay[], model: AgendaModel, page: number, total: nu
         cantSplit: true,
         children: [
           new TableCell({
-            columnSpan: 2,
             borders: emptyBorders,
             margins: { top: 0, right: 70, bottom: 40, left: 70 },
             children: [modelHeader(model, days, page, total)],
           }),
         ],
       }),
-      new TableRow({ children: [cells[0], cells[1]] }),
-      new TableRow({ children: [cells[2], cells[3]] }),
-      new TableRow({ children: [cells[4], cells[5]] }),
-      new TableRow({ children: [cells[6], monthSummary(days)] }),
+      new TableRow({ children: [cells[0]] }),
+      new TableRow({ children: [cells[1]] }),
     ],
   });
 }
 
 function dayCellClassic(day: AgendaDay): TableCell {
   return new TableCell({
-    width: { size: 50, type: WidthType.PERCENTAGE },
+    width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
     margins: { top: 160, right: 220, bottom: 180, left: 220 },
     borders: emptyBorders,
@@ -360,14 +334,14 @@ function dayCellClassic(day: AgendaDay): TableCell {
           new TextRun({ text: `  ${day.weekday}`, bold: true, size: 22 }),
         ],
       }),
-      ...lines(12, "9CA3AF", 18),
+      ...lines(14, "9CA3AF", 18),
     ],
   });
 }
 
 function dayCellColor(day: AgendaDay, color: string): TableCell {
   return new TableCell({
-    width: { size: 46, type: WidthType.PERCENTAGE },
+    width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
     margins: { top: 80, right: 80, bottom: 90, left: 80 },
     borders: {
@@ -383,7 +357,7 @@ function dayCellColor(day: AgendaDay, color: string): TableCell {
         borders: emptyBorders,
         rows: [
           dayRibbonRow(day, color),
-          ...ruledLineRows(7),
+          ...ruledLineRows(18),
         ],
       }),
     ],
@@ -392,7 +366,7 @@ function dayCellColor(day: AgendaDay, color: string): TableCell {
 
 function dayCellWeek(day: AgendaDay, color: string): TableCell {
   return new TableCell({
-    width: { size: 50, type: WidthType.PERCENTAGE },
+    width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
     margins: { top: 120, right: 150, bottom: 140, left: 150 },
     borders: emptyBorders,
@@ -404,7 +378,7 @@ function dayCellWeek(day: AgendaDay, color: string): TableCell {
           new TextRun({ text: `  ${day.month}`, size: 16, color: "6B7280" }),
         ],
       }),
-      ...lines(day.date.getDay() === 0 || day.date.getDay() === 6 ? 3 : 4, "111827", 18),
+      ...lines(14, "111827", 18),
     ],
   });
 }
@@ -436,7 +410,7 @@ function monthSummary(days: AgendaDay[]): TableCell {
 
 function blankCell(): TableCell {
   return new TableCell({
-    width: { size: 50, type: WidthType.PERCENTAGE },
+    width: { size: 100, type: WidthType.PERCENTAGE },
     borders: emptyBorders,
     children: [new Paragraph("")],
   });
@@ -543,10 +517,6 @@ function ruledLineRows(count: number): TableRow[] {
 }
 
 function buildPageGroups(days: AgendaDay[], modelId: AgendaModelId): AgendaDay[][] {
-  if (modelId === "semana-vista") {
-    return groupByWeeks(days);
-  }
-
   const perPage = DAYS_BY_MODEL[modelId];
   const groups: AgendaDay[][] = [];
 
