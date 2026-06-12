@@ -488,10 +488,10 @@ function dayRibbonRow(day: AgendaDay, color: string): TableRow {
         width: { size: 18, type: WidthType.PERCENTAGE },
         shading: { fill: color },
         borders: emptyBorders,
-        margins: { top: 25, right: 25, bottom: 25, left: 25 },
+        margins: { top: 25, right: 25, bottom: 25, left: 45 },
         children: [
           new Paragraph({
-            alignment: AlignmentType.CENTER,
+            alignment: AlignmentType.LEFT,
             children: [new TextRun({ text: day.dayNumber, bold: true, color: "FFFFFF", size: 20 })],
           }),
         ],
