@@ -190,8 +190,8 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
 
   return a5Pages.map((page, index) => {
     const isOdd = index % 2 === 0;
-    const bindingMargin = 1021; // 1.8 cm en twips
-    const normalMargin = PAGE_MARGIN.left; // 280
+    const bindingMargin = 850; // 1.5 cm en twips
+    const outerMargin = 454; // 0.8 cm en twips
 
     return {
       properties: {
@@ -202,8 +202,8 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
           },
           margin: {
             ...PAGE_MARGIN,
-            left: isOdd ? bindingMargin : normalMargin,
-            right: isOdd ? normalMargin : bindingMargin,
+            left: isOdd ? bindingMargin : outerMargin,
+            right: isOdd ? outerMargin : bindingMargin,
           },
         },
       },
@@ -383,7 +383,7 @@ function dayCellColor(day: AgendaDay, color: string): TableCell {
         borders: emptyBorders,
         rows: [
           dayRibbonRow(day, color),
-          ...ruledLineRows(21),
+          ...ruledLineRows(13),
         ],
       }),
     ],
@@ -529,7 +529,7 @@ function ruledLineRows(count: number): TableRow[] {
     { length: count },
     () =>
       new TableRow({
-        height: { value: 210, rule: HeightRule.EXACT },
+        height: { value: 340, rule: HeightRule.EXACT },
         children: [
           new TableCell({
             columnSpan: 2,
