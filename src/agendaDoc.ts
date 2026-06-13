@@ -302,7 +302,7 @@ function colorPopPage(days: AgendaDay[]): Table {
       }),
       new TableRow({ cantSplit: true, children: [cells[0]] }),
       new TableRow({
-        height: { value: 200, rule: HeightRule.EXACT },
+        height: { value: 250, rule: HeightRule.EXACT },
         children: [blankCell()],
       }),
       new TableRow({ cantSplit: true, children: [cells[1]] }),
@@ -341,7 +341,7 @@ function dayCellClassic(day: AgendaDay): TableCell {
   return new TableCell({
     width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
-    margins: { top: 80, right: 220, bottom: 240, left: 220 },
+    margins: { top: 80, right: 220, bottom: 260, left: 220 },
     borders: emptyBorders,
     children: [
       new Paragraph({
@@ -373,7 +373,7 @@ function dayCellColor(day: AgendaDay, color: string): TableCell {
         borders: emptyBorders,
         rows: [
           dayRibbonRow(day, color),
-          ...ruledLineRows(20),
+          ...ruledLineRows(21),
         ],
       }),
     ],
@@ -384,7 +384,7 @@ function dayCellWeek(day: AgendaDay, color: string): TableCell {
   return new TableCell({
     width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
-    margins: { top: 120, right: 150, bottom: 180, left: 150 },
+    margins: { top: 120, right: 150, bottom: 220, left: 150 },
     borders: emptyBorders,
     children: [
       new Paragraph({
