@@ -302,7 +302,7 @@ function colorPopPage(days: AgendaDay[]): Table {
       }),
       new TableRow({ cantSplit: true, children: [cells[0]] }),
       new TableRow({
-        height: { value: 140, rule: HeightRule.EXACT },
+        height: { value: 200, rule: HeightRule.EXACT },
         children: [blankCell()],
       }),
       new TableRow({ cantSplit: true, children: [cells[1]] }),
@@ -341,7 +341,7 @@ function dayCellClassic(day: AgendaDay): TableCell {
   return new TableCell({
     width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
-    margins: { top: 80, right: 220, bottom: 180, left: 220 },
+    margins: { top: 80, right: 220, bottom: 240, left: 220 },
     borders: emptyBorders,
     children: [
       new Paragraph({
@@ -350,7 +350,7 @@ function dayCellClassic(day: AgendaDay): TableCell {
           new TextRun({ text: `  ${day.weekday}`, bold: true, size: 22 }),
         ],
       }),
-      ...lines(14, "9CA3AF", 18),
+      ...lines(15, "9CA3AF", 18),
     ],
   });
 }
@@ -373,7 +373,7 @@ function dayCellColor(day: AgendaDay, color: string): TableCell {
         borders: emptyBorders,
         rows: [
           dayRibbonRow(day, color),
-          ...ruledLineRows(18),
+          ...ruledLineRows(20),
         ],
       }),
     ],
@@ -384,7 +384,7 @@ function dayCellWeek(day: AgendaDay, color: string): TableCell {
   return new TableCell({
     width: { size: 100, type: WidthType.PERCENTAGE },
     verticalAlign: VerticalAlign.TOP,
-    margins: { top: 120, right: 150, bottom: 140, left: 150 },
+    margins: { top: 120, right: 150, bottom: 180, left: 150 },
     borders: emptyBorders,
     children: [
       new Paragraph({
@@ -394,7 +394,7 @@ function dayCellWeek(day: AgendaDay, color: string): TableCell {
           new TextRun({ text: `  ${day.month}`, size: 16, color: "6B7280" }),
         ],
       }),
-      ...lines(14, "111827", 18),
+      ...lines(15, "111827", 18),
     ],
   });
 }
@@ -575,7 +575,7 @@ function lines(count: number, color: string, size: number): Table[] {
     { length: count },
     () =>
       new TableRow({
-        height: { value: 320, rule: HeightRule.EXACT },
+        height: { value: 280, rule: HeightRule.EXACT },
         children: [
           new TableCell({
             borders: {
