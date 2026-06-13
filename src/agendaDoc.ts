@@ -188,18 +188,28 @@ function buildSections(days: AgendaDay[], modelId: AgendaModelId, selectedModel:
     return weekPage(group, selectedModel, index + 1, pageGroups.length);
   });
 
-  return a5Pages.map((page) => ({
-    properties: {
-      page: {
-        size: {
-          ...A5_PORTRAIT,
-          orientation: PageOrientation.PORTRAIT,
+  return a5Pages.map((page, index) => {
+    const isOdd = index % 2 === 0;
+    const bindingMargin = 1021; // 1.8 cm en twips
+    const normalMargin = PAGE_MARGIN.left; // 280
+
+    return {
+      properties: {
+        page: {
+          size: {
+            ...A5_PORTRAIT,
+            orientation: PageOrientation.PORTRAIT,
+          },
+          margin: {
+            ...PAGE_MARGIN,
+            left: isOdd ? bindingMargin : normalMargin,
+            right: isOdd ? normalMargin : bindingMargin,
+          },
         },
-        margin: PAGE_MARGIN,
       },
-    },
-    children: [page],
-  }));
+      children: [page],
+    };
+  });
 }
 
 function classicPage(days: AgendaDay[], pageIndex: number): Table {
